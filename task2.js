@@ -1,7 +1,39 @@
-// На сторінці index.html знаходяться поля зазначені коментарем Task2
-// При введені імені користувача в поле #userNameInput та натиску на кнопку
-// #getUserButton потрібно зробити запит Fetch за посиланням - https://jsonplaceholder.typicode.com/users
-// Віднайти користувача із введеним ім'ям, отримати місто його проживанння та
-// відобразити у тезі #userCity
-// Запустити програму потрібно за допомогою Live Server
-// Перевірити правильність програми - команда node tests/task2.test.js
+const userNameInput = document.querySelector("#userNameInput");
+const getUserButton = document.querySelector("#getUserButton");
+const userCitySpan = document.querySelector("#userCity");
+
+function getCityByName() {
+  const searchName = userNameInput.value.trim();
+
+  if (!searchName) {
+    userCitySpan.textContent = "Enter user name.";
+    return;
+  }
+
+  userCitySpan.textContent = "Loading...";
+
+  fetch(USERS_API_URL)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((users) => {
+      const foundUser = users.find(
+        (user) => user.name.toLowerCase() === searchName.toLowerCase()
+      );
+
+      if (foundUser) {
+        userCitySpan.textContent = foundUser.address.city;
+      } else {
+        userCitySpan.textContent = `"${searchName}" not found.`;
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching", error);
+      userCitySpan.textContent = `Error: ${error.message}`;
+    });
+}
+
+getUserButton.addEventListener("click", getCityByName);
